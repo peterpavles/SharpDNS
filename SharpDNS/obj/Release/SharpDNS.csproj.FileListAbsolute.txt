@@ -1,6 +1,0 @@
-C:\Users\Karp\source\repos\SharpDNS\SharpDNS\bin\Release\SharpDNS.exe.config
-C:\Users\Karp\source\repos\SharpDNS\SharpDNS\bin\Release\SharpDNS.exe
-C:\Users\Karp\source\repos\SharpDNS\SharpDNS\bin\Release\SharpDNS.pdb
-C:\Users\Karp\source\repos\SharpDNS\SharpDNS\obj\Release\SharpDNS.csproj.CoreCompileInputs.cache
-C:\Users\Karp\source\repos\SharpDNS\SharpDNS\obj\Release\SharpDNS.exe
-C:\Users\Karp\source\repos\SharpDNS\SharpDNS\obj\Release\SharpDNS.pdb
