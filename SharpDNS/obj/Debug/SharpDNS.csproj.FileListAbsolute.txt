@@ -1,0 +1,7 @@
+C:\Users\Karp\source\repos\SharpDNS\SharpDNS\bin\Debug\SharpDNS.exe.config
+C:\Users\Karp\source\repos\SharpDNS\SharpDNS\bin\Debug\SharpDNS.exe
+C:\Users\Karp\source\repos\SharpDNS\SharpDNS\bin\Debug\SharpDNS.pdb
+C:\Users\Karp\source\repos\SharpDNS\SharpDNS\obj\Debug\SharpDNS.csproj.CoreCompileInputs.cache
+C:\Users\Karp\source\repos\SharpDNS\SharpDNS\obj\Debug\SharpDNS.exe
+C:\Users\Karp\source\repos\SharpDNS\SharpDNS\obj\Debug\SharpDNS.pdb
+C:\Users\Karp\source\repos\SharpDNS\SharpDNS\obj\Debug\SharpDNS.csprojAssemblyReference.cache

